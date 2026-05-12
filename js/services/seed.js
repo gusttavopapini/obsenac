@@ -119,7 +119,7 @@ const SEED_PROJECTS = [
       {
         date: '2024-06-20T10:00:00.000Z',
         event: 'Validado pelo professor para continuidade',
-        desc: 'Prof. Bruno Costa validou o progresso e aprovou a continuidade.',
+        desc: 'Prof. Bruno Costa validou o progresso e aprovou a continuidade. A equipe conseguiu concluir a prototipagem dos sensores e enviar dados para o servidor na nuvem.',
         authorId: 'u3',
       },
     ],
@@ -133,7 +133,7 @@ const SEED_PROJECTS = [
     skills: ['Machine Learning', 'Python', 'TensorFlow', 'Análise de Dados'],
     ownerId: 'u5',
     advisorId: 'u2',
-    members: ['u5'],
+    members: ['u5', 'u4'],
     semester: '2024.2',
     createdAt: '2024-02-15T10:00:00.000Z',
     history: [
@@ -146,13 +146,19 @@ const SEED_PROJECTS = [
       {
         date: '2024-06-30T10:00:00.000Z',
         event: 'Encerramento do semestre 2024.1',
-        desc: 'Modelo com acurácia de 82%. Profa. Ana Lima recomendou continuidade.',
+        desc: 'Modelo base com acurácia de 82%. Profa. Ana Lima recomendou continuidade para focar em fine-tuning e deployment.',
         authorId: 'u2',
       },
       {
         date: '2024-08-05T10:00:00.000Z',
         event: 'Retomada no semestre 2024.2',
         desc: 'Juliana retomou o projeto com foco em aumentar a acurácia para 90%.',
+        authorId: 'u5',
+      },
+      {
+        date: '2024-08-10T10:00:00.000Z',
+        event: 'Novo membro integrado',
+        desc: 'Lucas Ferreira ingressou na equipe para desenvolver a interface web e API do modelo de predição.',
         authorId: 'u5',
       },
     ],
@@ -166,15 +172,27 @@ const SEED_PROJECTS = [
     skills: ['React', 'Node.js', 'Banco de Dados', 'UI/UX'],
     ownerId: 'u4',
     advisorId: 'u2',
-    members: ['u4'],
+    members: ['u4', 'u6'],
     semester: '2024.2',
     createdAt: '2024-08-20T10:00:00.000Z',
     history: [
       {
         date: '2024-08-20T10:00:00.000Z',
         event: 'Projeto criado',
-        desc: 'Lucas Ferreira iniciou o desenvolvimento do MVP.',
+        desc: 'Lucas Ferreira iniciou o desenvolvimento do MVP utilizando React Native.',
         authorId: 'u4',
+      },
+      {
+        date: '2024-09-05T10:00:00.000Z',
+        event: 'Rafael Souza entrou no time',
+        desc: 'Rafael assumiu a liderança na parte de infraestrutura e otimização de banco de dados.',
+        authorId: 'u4',
+      },
+      {
+        date: '2024-10-10T10:00:00.000Z',
+        event: 'Revisão com o Professor',
+        desc: 'Profa. Ana Lima avaliou a estrutura do banco e a modelagem do aplicativo, solicitando algumas melhorias na segurança dos dados.',
+        authorId: 'u2',
       },
     ],
   },
@@ -194,17 +212,50 @@ const SEED_PROJECTS = [
       {
         date: '2023-08-10T10:00:00.000Z',
         event: 'Projeto criado',
-        desc: 'Equipe formada por Juliana e Lucas no semestre 2023.2.',
+        desc: 'Equipe formada por Juliana e Lucas no semestre 2023.2, com início do levantamento bibliográfico.',
         authorId: 'u5',
+      },
+      {
+        date: '2023-10-20T10:00:00.000Z',
+        event: 'Finalização do modelo base',
+        desc: 'O primeiro pipeline de dados foi construído com sucesso, alcançando resultados parciais satisfatórios.',
+        authorId: 'u4',
       },
       {
         date: '2023-12-15T10:00:00.000Z',
         event: 'Projeto concluído com aprovação máxima',
-        desc: 'Trabalho publicado no simpósio interno e marcado como concluído.',
+        desc: 'Trabalho publicado no simpósio interno e marcado como concluído. Excelente contribuição da equipe.',
         authorId: 'u2',
       },
     ],
   },
+  {
+    id: 'p5',
+    title: 'Sistema de Autenticação Biométrica Centralizada',
+    objective:
+      'Construir um sistema seguro utilizando C++ e bibliotecas de biometria para unificar acessos nos laboratórios do campus.',
+    status: 'aguardando_equipe',
+    skills: ['C++', 'Segurança da Informação', 'Banco de Dados'],
+    ownerId: 'u6',
+    advisorId: 'u3',
+    members: ['u6'],
+    semester: '2024.2',
+    createdAt: '2024-09-01T10:00:00.000Z',
+    history: [
+      {
+        date: '2024-09-01T10:00:00.000Z',
+        event: 'Projeto proposto',
+        desc: 'Rafael Souza elaborou a documentação inicial do sistema.',
+        authorId: 'u6',
+      },
+      {
+        date: '2024-09-15T10:00:00.000Z',
+        event: 'Revisão inicial',
+        desc: 'Prof. Bruno Costa revisou a arquitetura de segurança e o projeto está aguardando mais membros para o desenvolvimento backend.',
+        authorId: 'u3',
+      },
+    ],
+  }
 ];
 
 /**
