@@ -352,7 +352,7 @@ function openCreateUserModal() {
       });
 
       if (result.success) {
-        showToast('Usuário Cadastrado', \`\${nameInput.value.trim()} foi cadastrado com sucesso.\`, 'success');
+        showToast('Usuário Cadastrado', `${nameInput.value.trim()} foi cadastrado com sucesso.`, 'success');
         closeModal();
         renderUsers();
       } else {

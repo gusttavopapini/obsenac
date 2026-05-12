@@ -101,7 +101,7 @@ function handleLogin() {
     btn.textContent = 'Entrar';
 
     if (result.success) {
-      showToast('Login realizado!', \`Bem-vindo(a), \${result.user.name.split(' ')[0]}!\`, 'success');
+      showToast('Login realizado!', `Bem-vindo(a), ${result.user.name.split(' ')[0]}!`, 'success');
       redirectByRole(result.user.role);
     } else {
       showToast('Erro ao entrar', result.error, 'error');
