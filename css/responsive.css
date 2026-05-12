@@ -1,0 +1,85 @@
+/* =============================================
+   RESPONSIVE – PCGPA
+============================================= */
+
+/* ── TABLET (≤ 1024px) ───────────────────── */
+@media (max-width: 1024px) {
+  .grid-4   { grid-template-columns: repeat(2, 1fr); }
+  .grid-3   { grid-template-columns: repeat(2, 1fr); }
+  .auth-root{ grid-template-columns: 1fr; }
+  .auth-side{ display: none; }
+  .admin-grid { grid-template-columns: 1fr; }
+  .profile-section { grid-template-columns: 1fr; }
+  .project-detail-body { grid-template-columns: 1fr; }
+}
+
+/* ── MOBILE (≤ 768px) ────────────────────── */
+@media (max-width: 768px) {
+  :root {
+    --nav-height: 56px;
+  }
+
+  /* Navbar mobile */
+  .nav-links {
+    display: none;
+    position: fixed;
+    top: var(--nav-height);
+    left: 0; right: 0;
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    flex-direction: column;
+    padding: var(--space-3);
+    box-shadow: var(--shadow-lg);
+    z-index: var(--z-navbar);
+  }
+  .nav-links.open { display: flex; }
+  .nav-username { display: none; }
+  .hamburger { display: flex; }
+
+  /* Grids */
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .projects-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: 1fr; }
+  .roles-grid    { grid-template-columns: 1fr; }
+
+  /* Hero */
+  .hero-content  { flex-direction: column; padding: var(--space-8) var(--content-padding); gap: var(--space-8); }
+  .hero-visual   { max-width: 100%; }
+  .hero-cta      { flex-direction: column; }
+  .hero-h1       { font-size: 2rem; }
+
+  /* Auth */
+  .auth-panel { padding: var(--space-8) var(--space-5); }
+
+  /* Banners */
+  .welcome-banner { padding: var(--space-6); }
+  .welcome-banner::after { display: none; }
+
+  /* Teams */
+  .team-item     { flex-direction: column; align-items: flex-start; }
+  .team-actions  { width: 100%; }
+
+  /* Toast */
+  #toast-container { bottom: var(--space-4); right: var(--space-4); left: var(--space-4); }
+  .toast { max-width: 100%; }
+
+  /* Modal */
+  .modal-overlay { align-items: flex-end; padding: 0; }
+  .modal-box {
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    max-height: 90vh;
+    max-width: 100%;
+    animation: modalInMobile var(--duration-normal) var(--ease-out) forwards;
+  }
+
+  /* Section header stack */
+  .section-header { flex-direction: column; align-items: flex-start; }
+}
+
+/* ── TINY (≤ 480px) ──────────────────────── */
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr; }
+  .hero-cta .btn { width: 100%; }
+  .landing-nav-actions .btn:first-child { display: none; }
+}
