@@ -4,9 +4,9 @@
  */
 
 import { navigate }        from '../modules/router.js';
-import { showToast, escapeHtml, formatDate, getInitials } from '../modules/ui.js';
+import { showToast, escapeHtml, formatDate, getInitials, openModal, closeModal, initTagsInput, validateField, clearFormErrors } from '../modules/ui.js';
 import { getSession, logout } from '../services/auth.js';
-import { getAllUsers, setUserStatus } from '../services/userService.js';
+import { getAllUsers, setUserStatus, createUserByAdmin } from '../services/userService.js';
 import { getMetrics, getAllProjects, STATUS_LABELS } from '../services/projectService.js';
 
 let _user = null;
@@ -135,6 +135,7 @@ function renderUsers() {
             <h2 class="section-title">👥 Gestão de Usuários</h2>
             <p class="section-subtitle">Aprove, bloqueie e gerencie os usuários da plataforma</p>
           </div>
+          <button class="btn btn-accent" id="btn-new-user">+ Novo Usuário</button>
         </div>
 
         <div class="card animate-fadeInUp">
@@ -181,6 +182,7 @@ function renderUsers() {
   `;
 
   bindUserActions();
+  document.getElementById('btn-new-user')?.addEventListener('click', openCreateUserModal);
 }
 
 // ── TELA: Projetos ────────────────────────────────────────────────────────────
@@ -269,6 +271,97 @@ function rerenderCurrentTab() {
   if (view === 'users')    renderUsers();
   else if (view === 'projects') renderProjects();
   else renderOverview();
+}
+
+// ── MODAL: Criar Usuário ──────────────────────────────────────────────────────
+function openCreateUserModal() {
+  openModal(`
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">Novo Usuário</h2>
+      <p class="modal-subtitle">Cadastre um novo aluno ou professor</p>
+    </div>
+    <div class="modal-body">
+      <form id="create-user-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="cu-name">Nome completo <span class="required">*</span></label>
+          <input id="cu-name" class="form-control" type="text" placeholder="Nome completo" required />
+          <span class="form-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cu-email">E-mail institucional <span class="required">*</span></label>
+          <input id="cu-email" class="form-control" type="email" placeholder="seu@instituicao.edu.br" required />
+          <span class="form-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cu-role">Perfil <span class="required">*</span></label>
+          <select id="cu-role" class="form-control" required>
+            <option value="aluno">Aluno</option>
+            <option value="professor">Professor</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cu-password">Senha Provisória <span class="required">*</span></label>
+          <input id="cu-password" class="form-control" type="password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+          <span class="form-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Habilidades <span class="text-muted text-sm">(opcional – Enter para adicionar)</span></label>
+          <div class="tags-input-wrapper" id="cu-skills-wrapper">
+            <input class="tags-input-field" id="cu-skills-field" type="text" placeholder="ex: Python, React…" />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancel-create-user">Cancelar</button>
+      <button class="btn btn-accent" id="submit-create-user">Cadastrar</button>
+    </div>
+  `);
+
+  const wrapper = document.getElementById('cu-skills-wrapper');
+  let tagsInput = null;
+  if (wrapper) tagsInput = initTagsInput(wrapper, []);
+
+  document.getElementById('cancel-create-user')?.addEventListener('click', closeModal);
+  document.getElementById('submit-create-user')?.addEventListener('click', () => {
+    const nameInput  = document.getElementById('cu-name');
+    const emailInput = document.getElementById('cu-email');
+    const passInput  = document.getElementById('cu-password');
+    const roleInput  = document.getElementById('cu-role');
+    const form       = document.getElementById('create-user-form');
+    clearFormErrors(form);
+
+    let valid = true;
+    if (!nameInput.value.trim())  { validateField(nameInput, 'Nome obrigatório.');  valid = false; }
+    if (!emailInput.value.trim()) { validateField(emailInput, 'E-mail obrigatório.'); valid = false; }
+    if (passInput.value.length < 6) { validateField(passInput, 'A senha deve ter no mínimo 6 caracteres.'); valid = false; }
+    
+    if (!valid) return;
+
+    const btn = document.getElementById('submit-create-user');
+    btn.disabled = true;
+    btn.textContent = 'Cadastrando...';
+
+    setTimeout(() => {
+      const result = createUserByAdmin({
+        name:     nameInput.value.trim(),
+        email:    emailInput.value.trim(),
+        password: passInput.value,
+        role:     roleInput.value,
+        skills:   tagsInput ? tagsInput.getValue() : [],
+      });
+
+      if (result.success) {
+        showToast('Usuário Cadastrado', \`\${nameInput.value.trim()} foi cadastrado com sucesso.\`, 'success');
+        closeModal();
+        renderUsers();
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Cadastrar';
+        showToast('Erro no cadastro', result.error, 'error');
+      }
+    }, 400);
+  });
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

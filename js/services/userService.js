@@ -46,3 +46,25 @@ export function updateProfile(userId, data) {
   set(KEYS.USERS, users);
   return true;
 }
+
+/**
+ * Cria um usuário diretamente como aprovado pelo Admin.
+ */
+export function createUserByAdmin(data) {
+  const users = get(KEYS.USERS, []);
+  if (users.find(u => u.email.toLowerCase() === data.email.toLowerCase())) {
+    return { success: false, error: 'Este e-mail já está cadastrado.' };
+  }
+  const newUser = {
+    id:        `u${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+    name:      data.name.trim(),
+    email:     data.email.toLowerCase().trim(),
+    password:  data.password,
+    role:      data.role,
+    status:    'approved',
+    skills:    data.skills || [],
+    createdAt: new Date().toISOString(),
+  };
+  set(KEYS.USERS, [...users, newUser]);
+  return { success: true };
+}

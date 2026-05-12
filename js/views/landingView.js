@@ -27,7 +27,6 @@ export function renderLanding() {
           </div>
           <div class="landing-nav-actions">
             <button id="landing-login-btn"    class="btn btn-ghost"   style="color:rgba(255,255,255,0.8)">Entrar</button>
-            <button id="landing-register-btn" class="btn btn-accent">Cadastrar</button>
           </div>
         </nav>
 
@@ -137,8 +136,7 @@ export function renderLanding() {
 
   // ── Event Listeners ───────────────────────────────────────────────────────
   document.getElementById('landing-login-btn')?.addEventListener('click',    () => navigate('login'));
-  document.getElementById('landing-register-btn')?.addEventListener('click', () => navigate('register'));
-  document.getElementById('hero-start-btn')?.addEventListener('click',       () => navigate('register'));
+  document.getElementById('hero-start-btn')?.addEventListener('click',       () => navigate('login'));
   document.getElementById('hero-learn-btn')?.addEventListener('click', () => {
     document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
   });
