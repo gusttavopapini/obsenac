@@ -22,7 +22,7 @@ export function renderLanding() {
         <!-- Nav pública -->
         <nav class="landing-nav" aria-label="Navegação principal">
           <div class="landing-nav-brand">
-            <span class="landing-nav-logo" aria-hidden="true">🎓</span>
+            <span class="landing-nav-logo" aria-hidden="true"></span>
             <span class="landing-nav-name">PC<span>GPA</span></span>
           </div>
           <div class="landing-nav-actions">
@@ -33,7 +33,7 @@ export function renderLanding() {
         <!-- Conteúdo hero -->
         <div class="hero-content">
           <div class="hero-text animate-fadeInUp">
-            <span class="hero-eyebrow">🚀 Plataforma Institucional v1.0</span>
+            <span class="hero-eyebrow">Plataforma Institucional v1.0</span>
             <h1 class="hero-h1">Dê <span>continuidade</span> ao que importa na academia</h1>
             <p class="hero-desc">
               A PCGPA conecta alunos, professores e coordenação para garantir que nenhum projeto acadêmico seja abandonado ao fim do semestre. Gerencie equipes, valide entregas e encontre seu match de habilidades.
@@ -46,7 +46,7 @@ export function renderLanding() {
 
           <div class="hero-visual animate-slideRight">
             <div class="hero-card-preview animate-float">
-              <div class="hero-card-label">🔥 Match encontrado!</div>
+              <div class="hero-card-label">Match encontrado!</div>
               <div class="hero-project-title">IA para Diagnóstico Médico por Imagem</div>
               <div class="hero-project-meta">
                 <span class="badge badge-orange">Em Continuidade</span>
@@ -58,7 +58,7 @@ export function renderLanding() {
                 <span class="hero-skill-chip">Machine Learning</span>
               </div>
               <div class="hero-match-row">
-                <span class="hero-match-icon">🎯</span>
+                <span class="hero-match-icon">*</span>
                 <div class="hero-match-info">
                   <div class="hero-match-label">Compatibilidade de habilidades</div>
                   <div class="hero-match-value">3 de 3 skills em comum</div>
@@ -67,7 +67,7 @@ export function renderLanding() {
             </div>
 
             <div class="hero-card-preview" style="opacity:0.7;transform:scale(0.97)">
-              <div class="hero-card-label">📊 Progresso da equipe</div>
+              <div class="hero-card-label">Progresso da equipe</div>
               <div class="hero-project-title">Monitoramento de Qualidade do Ar – IoT</div>
               <div style="margin-top:0.75rem">
                 <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
@@ -86,12 +86,12 @@ export function renderLanding() {
           <p class="features-desc">Uma plataforma completa para cada perfil acadêmico, do aluno ao coordenador.</p>
           <div class="features-grid">
             ${[
-              { icon:'🔄', title:'Continuidade Garantida', desc:'Projetos não morrem ao fim do semestre. O histórico completo é preservado e a equipe pode ser renovada com novos alunos.' },
-              { icon:'🎯', title:'Match de Habilidades',   desc:'Nosso algoritmo conecta alunos às equipes certas com base nas skills do perfil, maximizando o aproveitamento de talentos.' },
-              { icon:'📊', title:'Dashboard Analítico',    desc:'Coordenadores visualizam métricas em tempo real: projetos ativos, em continuidade, equipes e progresso por semestre.' },
-              { icon:'✅', title:'Validação Docente',      desc:'Professores orientadores validam a continuidade de cada projeto ao fim do semestre com um clique, gerando registro no histórico.' },
-              { icon:'🔐', title:'Controle de Acesso',     desc:'Sistema de roles com 3 níveis: Aluno, Professor e Coordenador. Aprovação de novos cadastros pela coordenação.' },
-              { icon:'📜', title:'Histórico de Versões',   desc:'Cada projeto mantém uma linha do tempo detalhada de todos os eventos, integrantes e validações ao longo dos semestres.' },
+              { icon:'', title:'Continuidade Garantida', desc:'Projetos não morrem ao fim do semestre. O histórico completo é preservado e a equipe pode ser renovada com novos alunos.' },
+              { icon:'', title:'Match de Habilidades',   desc:'Nosso algoritmo conecta alunos às equipes certas com base nas skills do perfil, maximizando o aproveitamento de talentos.' },
+              { icon:'', title:'Dashboard Analítico',    desc:'Coordenadores visualizam métricas em tempo real: projetos ativos, em continuidade, equipes e progresso por semestre.' },
+              { icon:'', title:'Validação Docente',      desc:'Professores orientadores validam a continuidade de cada projeto ao fim do semestre com um clique, gerando registro no histórico.' },
+              { icon:'', title:'Controle de Acesso',     desc:'Sistema de roles com 3 níveis: Aluno, Professor e Coordenador. Aprovação de novos cadastros pela coordenação.' },
+              { icon:'', title:'Histórico de Versões',   desc:'Cada projeto mantém uma linha do tempo detalhada de todos os eventos, integrantes e validações ao longo dos semestres.' },
             ].map(f => `
               <div class="feature-item">
                 <div class="feature-icon-wrap">${f.icon}</div>
@@ -109,17 +109,17 @@ export function renderLanding() {
           <h2 class="roles-heading">Uma plataforma, três perfis</h2>
           <div class="roles-grid">
             <div class="role-card">
-              <div class="role-emoji">🧑‍💻</div>
+              <div class="role-emoji"></div>
               <h3 class="role-name">Aluno</h3>
               <p class="role-desc">Crie e gerencie seus projetos, cadastre suas habilidades e encontre equipes que precisam do seu perfil.</p>
             </div>
             <div class="role-card">
-              <div class="role-emoji">👨‍🏫</div>
+              <div class="role-emoji"></div>
               <h3 class="role-name">Professor</h3>
               <p class="role-desc">Acompanhe o progresso das equipes que você orienta e valide a continuidade ao fim de cada semestre.</p>
             </div>
             <div class="role-card">
-              <div class="role-emoji">🏛️</div>
+              <div class="role-emoji"></div>
               <h3 class="role-name">Coordenador</h3>
               <p class="role-desc">Aprove cadastros, gerencie usuários e monitore todas as métricas da plataforma em um painel central.</p>
             </div>

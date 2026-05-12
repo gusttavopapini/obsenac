@@ -29,8 +29,8 @@ function setupNavbar() {
   document.getElementById('nav-avatar').textContent   = getInitials(_user.name);
 
   document.getElementById('nav-links').innerHTML = `
-    <li><button class="nav-link active" id="nl-teams" data-view="teams"><span class="nav-link-icon">👥</span> Minhas Equipes</button></li>
-    <li><button class="nav-link" id="nl-all-projects" data-view="all"><span class="nav-link-icon">📂</span> Todos os Projetos</button></li>
+    <li><button class="nav-link active" id="nl-teams" data-view="teams"><span class="nav-link-icon"></span> Minhas Equipes</button></li>
+    <li><button class="nav-link" id="nl-all-projects" data-view="all"><span class="nav-link-icon"></span> Todos os Projetos</button></li>
   `;
 
   document.getElementById('nl-teams')?.addEventListener('click', () => renderTeams());
@@ -57,15 +57,15 @@ function renderTeams() {
       <div class="dashboard-content">
         <div class="welcome-banner animate-fadeInDown">
           <div class="welcome-greeting">Bem-vindo(a),</div>
-          <div class="welcome-name">${escapeHtml(_user.name)} 👋</div>
-          <span class="welcome-role">👨‍🏫 Professor Orientador</span>
+          <div class="welcome-name">${escapeHtml(_user.name)}</div>
+          <span class="welcome-role">Professor Orientador</span>
         </div>
 
         <div class="stats-row">
-          ${statCard('👥', myProjects.length, 'Equipes orientadas', 'stat-icon-navy')}
-          ${statCard('🟢', myProjects.filter(p => p.status === 'em_desenvolvimento').length, 'Em desenvolvimento', 'stat-icon-success')}
-          ${statCard('🔄', myProjects.filter(p => p.status === 'em_continuidade').length, 'Em continuidade', 'stat-icon-orange')}
-          ${statCard('✅', myProjects.filter(p => p.status === 'concluido').length, 'Concluídos', 'stat-icon-success')}
+          ${statCard('', myProjects.length, 'Equipes orientadas', 'stat-icon-navy')}
+          ${statCard('', myProjects.filter(p => p.status === 'em_desenvolvimento').length, 'Em desenvolvimento', 'stat-icon-success')}
+          ${statCard('', myProjects.filter(p => p.status === 'em_continuidade').length, 'Em continuidade', 'stat-icon-orange')}
+          ${statCard('', myProjects.filter(p => p.status === 'concluido').length, 'Concluídos', 'stat-icon-success')}
         </div>
 
         <div class="projects-section">
@@ -78,7 +78,7 @@ function renderTeams() {
 
           ${myProjects.length === 0 ? `
             <div class="empty-state">
-              <div class="empty-state-icon">👥</div>
+              <div class="empty-state-icon"></div>
               <div class="empty-state-title">Nenhuma equipe vinculada</div>
               <p class="empty-state-desc">Quando um aluno cadastrar um projeto com você como orientador, ele aparecerá aqui.</p>
             </div>
@@ -109,7 +109,7 @@ function teamItemHTML(project, users) {
       </div>
       <div class="team-info">
         <div class="team-project-name">${escapeHtml(project.title)}</div>
-        <div class="team-members">👤 ${escapeHtml(memberNames)}</div>
+        <div class="team-members">${escapeHtml(memberNames)}</div>
         <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;align-items:center">
           ${statusBadge(project.status)}
           <span class="badge badge-gray">${escapeHtml(project.semester || '–')}</span>
@@ -118,7 +118,7 @@ function teamItemHTML(project, users) {
       <div class="team-actions">
         <button class="btn btn-outline btn-sm btn-view-project" data-id="${project.id}">Ver detalhes</button>
         ${canValidate
-          ? `<button class="btn btn-success btn-sm btn-validate" data-id="${project.id}" data-title="${escapeHtml(project.title)}">✅ Validar Continuidade</button>`
+          ? `<button class="btn btn-success btn-sm btn-validate" data-id="${project.id}" data-title="${escapeHtml(project.title)}">Validar Continuidade</button>`
           : ''}
       </div>
     </div>
@@ -151,7 +151,7 @@ function renderAllProjects() {
       <div class="dashboard-content">
         <div class="section-header">
           <div>
-            <h2 class="section-title">📂 Todos os Projetos</h2>
+            <h2 class="section-title">Todos os Projetos</h2>
             <p class="section-subtitle">Visão geral de todos os projetos cadastrados</p>
           </div>
         </div>

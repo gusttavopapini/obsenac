@@ -17,7 +17,7 @@ function authLayout(formHtml, sideTitle, sideDesc) {
       <div class="auth-panel">
         <div class="auth-form-box animate-fadeInUp">
           <div class="auth-logo">
-            <span class="auth-logo-icon">🎓</span>
+            <span class="auth-logo-icon"></span>
             <span class="auth-logo-text">PC<span>GPA</span></span>
           </div>
           ${formHtml}
@@ -29,7 +29,7 @@ function authLayout(formHtml, sideTitle, sideDesc) {
         <div class="auth-side-orb auth-side-orb-1"></div>
         <div class="auth-side-orb auth-side-orb-2"></div>
         <div class="auth-side-content animate-fadeIn">
-          <span class="auth-side-icon">🎓</span>
+          <span class="auth-side-icon"></span>
           <h2 class="auth-side-title">${sideTitle}</h2>
           <p class="auth-side-desc">${sideDesc}</p>
         </div>

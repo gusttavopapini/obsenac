@@ -6,10 +6,10 @@
 // ── TOAST ─────────────────────────────────────────────────────────────────────
 
 const TOAST_ICONS = {
-  success: '✅',
-  error:   '❌',
-  warning: '⚠️',
-  info:    'ℹ️',
+  success: '✓',
+  error:   'x',
+  warning: '!',
+  info:    'i',
 };
 
 /**
@@ -26,7 +26,7 @@ export function showToast(title, message = '', type = 'info', duration = 3500) {
   const toast = document.createElement('div');
   toast.className = `toast toast-${type} animate__animated`;
   toast.innerHTML = `
-    <span class="toast-icon">${TOAST_ICONS[type] || 'ℹ️'}</span>
+    <span class="toast-icon">${TOAST_ICONS[type] || 'i'}</span>
     <div class="toast-body">
       <div class="toast-title">${title}</div>
       ${message ? `<div class="toast-msg">${message}</div>` : ''}

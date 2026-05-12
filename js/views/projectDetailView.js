@@ -19,7 +19,7 @@ export function renderProjectDetail(params = {}) {
       <div class="dashboard-root">
         <div class="dashboard-content">
           <div class="empty-state">
-            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-icon"></div>
             <div class="empty-state-title">Projeto não encontrado</div>
             <p class="empty-state-desc">O projeto que você procura não existe ou foi removido.</p>
             <button class="btn btn-primary" id="back-btn">← Voltar ao dashboard</button>
@@ -56,8 +56,8 @@ export function renderProjectDetail(params = {}) {
             </div>
             <h1 class="project-detail-title">${escapeHtml(project.title)}</h1>
             <div style="display:flex;flex-wrap:wrap;gap:1rem;margin-top:0.75rem">
-              ${owner ? `<span style="font-size:0.875rem;color:var(--navy-100);opacity:0.8">👤 Responsável: <strong>${escapeHtml(owner.name)}</strong></span>` : ''}
-              ${advisor ? `<span style="font-size:0.875rem;color:var(--navy-100);opacity:0.8">👨‍🏫 Orientador: <strong>${escapeHtml(advisor.name)}</strong></span>` : ''}
+              ${owner ? `<span style="font-size:0.875rem;color:var(--navy-100);opacity:0.8">Responsável: <strong>${escapeHtml(owner.name)}</strong></span>` : ''}
+              ${advisor ? `<span style="font-size:0.875rem;color:var(--navy-100);opacity:0.8">Orientador: <strong>${escapeHtml(advisor.name)}</strong></span>` : ''}
             </div>
           </div>
         </div>
@@ -70,7 +70,7 @@ export function renderProjectDetail(params = {}) {
         <div style="display:flex;flex-direction:column;gap:1.5rem">
           <!-- Objetivo -->
           <div class="card animate-fadeInUp">
-            <div class="card-header"><h3 style="font-size:1rem;font-weight:600">🎯 Objetivo</h3></div>
+            <div class="card-header"><h3 style="font-size:1rem;font-weight:600">Objetivo</h3></div>
             <div class="card-body">
               <p style="color:var(--gray-700);line-height:1.7;font-size:0.9375rem">${escapeHtml(project.objective)}</p>
             </div>
@@ -78,7 +78,7 @@ export function renderProjectDetail(params = {}) {
 
           <!-- Habilidades -->
           <div class="card animate-fadeInUp">
-            <div class="card-header"><h3 style="font-size:1rem;font-weight:600">🛠️ Habilidades Necessárias</h3></div>
+            <div class="card-header"><h3 style="font-size:1rem;font-weight:600">Habilidades Necessárias</h3></div>
             <div class="card-body">
               <div class="project-card-skills" style="gap:0.5rem">
                 ${(project.skills || []).map(s => `<span class="skill-tag">${escapeHtml(s)}</span>`).join('')}
@@ -89,7 +89,7 @@ export function renderProjectDetail(params = {}) {
 
           <!-- Histórico (Timeline) -->
           <div class="card animate-fadeInUp">
-            <div class="card-header"><h3 style="font-size:1rem;font-weight:600">📜 Histórico de Versões</h3></div>
+            <div class="card-header"><h3 style="font-size:1rem;font-weight:600">Histórico de Versões</h3></div>
             <div class="card-body">
               ${(project.history && project.history.length > 0) ? `
                 <div class="timeline">
@@ -115,7 +115,7 @@ export function renderProjectDetail(params = {}) {
           <!-- Integrantes -->
           <div class="card animate-fadeInUp">
             <div class="card-header">
-              <h3 style="font-size:1rem;font-weight:600">👥 Integrantes</h3>
+              <h3 style="font-size:1rem;font-weight:600">Integrantes</h3>
               <span class="badge badge-navy">${(project.members || []).length}</span>
             </div>
             <div class="card-body">
@@ -129,7 +129,7 @@ export function renderProjectDetail(params = {}) {
                       <div class="avatar avatar-sm">${getInitials(member.name)}</div>
                       <div class="member-info">
                         <div class="member-name">${escapeHtml(member.name)}</div>
-                        <div class="member-role">${isOwner ? '⭐ Responsável' : member.role === 'professor' ? '👨‍🏫 Orientador' : '🧑‍💻 Integrante'}</div>
+                        <div class="member-role">${isOwner ? 'Responsável' : member.role === 'professor' ? 'Orientador' : 'Integrante'}</div>
                       </div>
                     </div>
                   `;
@@ -139,7 +139,7 @@ export function renderProjectDetail(params = {}) {
                     <div class="avatar avatar-sm" style="background:linear-gradient(135deg,var(--orange-400),var(--orange-300))">${getInitials(advisor.name)}</div>
                     <div class="member-info">
                       <div class="member-name">${escapeHtml(advisor.name)}</div>
-                      <div class="member-role">👨‍🏫 Orientador</div>
+                      <div class="member-role">Orientador</div>
                     </div>
                   </div>
                 ` : ''}
@@ -149,7 +149,7 @@ export function renderProjectDetail(params = {}) {
 
           <!-- Informações -->
           <div class="card animate-fadeInUp">
-            <div class="card-header"><h3 style="font-size:1rem;font-weight:600">ℹ️ Informações</h3></div>
+            <div class="card-header"><h3 style="font-size:1rem;font-weight:600">Informações</h3></div>
             <div class="card-body" style="display:flex;flex-direction:column;gap:1rem">
               <div>
                 <div class="text-xs text-muted">Criado em</div>

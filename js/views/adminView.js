@@ -26,9 +26,9 @@ function setupNavbar() {
   document.getElementById('nav-avatar').textContent   = getInitials(_user.name);
 
   document.getElementById('nav-links').innerHTML = `
-    <li><button class="nav-link active" id="nl-overview" data-view="overview"><span class="nav-link-icon">📊</span> Visão Geral</button></li>
-    <li><button class="nav-link" id="nl-users" data-view="users"><span class="nav-link-icon">👥</span> Usuários</button></li>
-    <li><button class="nav-link" id="nl-projects" data-view="projects"><span class="nav-link-icon">📂</span> Projetos</button></li>
+    <li><button class="nav-link active" id="nl-overview" data-view="overview"><span class="nav-link-icon"></span> Visão Geral</button></li>
+    <li><button class="nav-link" id="nl-users" data-view="users"><span class="nav-link-icon"></span> Usuários</button></li>
+    <li><button class="nav-link" id="nl-projects" data-view="projects"><span class="nav-link-icon"></span> Projetos</button></li>
   `;
 
   document.getElementById('nl-overview')?.addEventListener('click', () => renderOverview());
@@ -58,29 +58,29 @@ function renderOverview() {
         <div class="welcome-banner animate-fadeInDown">
           <div class="welcome-greeting">Painel Administrativo</div>
           <div class="welcome-name">${escapeHtml(_user.name)} 👋</div>
-          <span class="welcome-role">🏛️ Coordenador(a)</span>
+          <span class="welcome-role">Coordenador(a)</span>
         </div>
 
         <!-- Métricas principais -->
         <div class="stats-row">
-          ${statCard('📂', metrics.total, 'Total de projetos', 'stat-icon-navy')}
-          ${statCard('🟢', metrics.emDesenvolvimento, 'Em desenvolvimento', 'stat-icon-success')}
-          ${statCard('🔄', metrics.emContinuidade, 'Em continuidade', 'stat-icon-orange')}
-          ${statCard('✅', metrics.concluidos, 'Concluídos', 'stat-icon-success')}
+          ${statCard('', metrics.total, 'Total de projetos', 'stat-icon-navy')}
+          ${statCard('', metrics.emDesenvolvimento, 'Em desenvolvimento', 'stat-icon-success')}
+          ${statCard('', metrics.emContinuidade, 'Em continuidade', 'stat-icon-orange')}
+          ${statCard('', metrics.concluidos, 'Concluídos', 'stat-icon-success')}
         </div>
 
         <!-- Métricas secundárias -->
         <div class="stats-row" style="margin-top:0">
-          ${statCard('👥', users.length, 'Total de usuários', 'stat-icon-navy')}
-          ${statCard('⏳', pending.length, 'Aprovações pendentes', 'stat-icon-warning')}
-          ${statCard('🧑‍💻', users.filter(u => u.role === 'aluno' && u.status === 'approved').length, 'Alunos ativos', 'stat-icon-success')}
-          ${statCard('👨‍🏫', users.filter(u => u.role === 'professor').length, 'Professores', 'stat-icon-navy')}
+          ${statCard('', users.length, 'Total de usuários', 'stat-icon-navy')}
+          ${statCard('', pending.length, 'Aprovações pendentes', 'stat-icon-warning')}
+          ${statCard('', users.filter(u => u.role === 'aluno' && u.status === 'approved').length, 'Alunos ativos', 'stat-icon-success')}
+          ${statCard('', users.filter(u => u.role === 'professor').length, 'Professores', 'stat-icon-navy')}
         </div>
 
         <!-- Gráfico de distribuição (visual simples) -->
         <div class="card animate-fadeInUp">
           <div class="card-header">
-            <h3 style="font-size:1rem;font-weight:600">📊 Distribuição de Status dos Projetos</h3>
+            <h3 style="font-size:1rem;font-weight:600">Distribuição de Status dos Projetos</h3>
           </div>
           <div class="card-body">
             ${chartBarHTML(metrics)}
@@ -91,7 +91,7 @@ function renderOverview() {
           <!-- Aprovações pendentes -->
           <div class="card animate-fadeInUp">
             <div class="card-header">
-              <h3 style="font-size:1rem;font-weight:600">⏳ Cadastros Pendentes</h3>
+              <h3 style="font-size:1rem;font-weight:600">Cadastros Pendentes</h3>
               <span class="badge badge-warning">${pending.length}</span>
             </div>
             <div class="table-wrapper">
@@ -132,7 +132,7 @@ function renderUsers() {
       <div class="dashboard-content">
         <div class="section-header">
           <div>
-            <h2 class="section-title">👥 Gestão de Usuários</h2>
+            <h2 class="section-title">Gestão de Usuários</h2>
             <p class="section-subtitle">Aprove, bloqueie e gerencie os usuários da plataforma</p>
           </div>
           <button class="btn btn-accent" id="btn-new-user">+ Novo Usuário</button>
@@ -196,7 +196,7 @@ function renderProjects() {
       <div class="dashboard-content">
         <div class="section-header">
           <div>
-            <h2 class="section-title">📂 Todos os Projetos</h2>
+            <h2 class="section-title">Todos os Projetos</h2>
             <p class="section-subtitle">${projects.length} projetos cadastrados na plataforma</p>
           </div>
         </div>
@@ -386,14 +386,14 @@ function statusBadge(status) {
 }
 
 function roleBadge(role) {
-  const map = { aluno: '🧑‍💻 Aluno', professor: '👨‍🏫 Professor', coordenador: '🏛️ Coordenador' };
+  const map = { aluno: 'Aluno', professor: 'Professor', coordenador: 'Coordenador' };
   return `<span class="badge badge-navy">${map[role] || role}</span>`;
 }
 
 function userStatusBadge(status) {
   const map = {
     approved: ['badge-success', '✓ Ativo'],
-    pending:  ['badge-warning', '⏳ Pendente'],
+    pending:  ['badge-warning', 'Pendente'],
     blocked:  ['badge-error',   '✕ Bloqueado'],
   };
   const [cls, lbl] = map[status] || ['badge-gray', status];

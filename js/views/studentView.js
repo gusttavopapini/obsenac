@@ -33,9 +33,9 @@ function setupNavbar() {
   document.getElementById('nav-avatar').textContent   = getInitials(_user.name);
 
   document.getElementById('nav-links').innerHTML = `
-    <li><button class="nav-link" id="nl-projects" data-view="projects"><span class="nav-link-icon">📂</span> Meus Projetos</button></li>
-    <li><button class="nav-link" id="nl-match"    data-view="match">   <span class="nav-link-icon">🎯</span> Match</button></li>
-    <li><button class="nav-link" id="nl-profile"  data-view="profile"> <span class="nav-link-icon">👤</span> Meu Perfil</button></li>
+    <li><button class="nav-link" id="nl-projects" data-view="projects"><span class="nav-link-icon"></span> Meus Projetos</button></li>
+    <li><button class="nav-link" id="nl-match"    data-view="match">   <span class="nav-link-icon"></span> Match</button></li>
+    <li><button class="nav-link" id="nl-profile"  data-view="profile"> <span class="nav-link-icon"></span> Meu Perfil</button></li>
   `;
 
   document.getElementById('nl-projects')?.addEventListener('click', () => renderMyProjects());
@@ -63,16 +63,16 @@ function renderMyProjects() {
         <!-- Banner de boas-vindas -->
         <div class="welcome-banner animate-fadeInDown">
           <div class="welcome-greeting">Olá,</div>
-          <div class="welcome-name">${escapeHtml(_user.name)} 👋</div>
-          <span class="welcome-role">🧑‍💻 ${_user.role === 'aluno' ? 'Aluno' : _user.role}</span>
+          <div class="welcome-name">${escapeHtml(_user.name)}</div>
+          <span class="welcome-role">${_user.role === 'aluno' ? 'Aluno' : _user.role}</span>
         </div>
 
         <!-- Stats -->
         <div class="stats-row">
-          ${statCard('📂', myProjects.length, 'Projetos criados', 'stat-icon-navy')}
-          ${statCard('🟢', myProjects.filter(p => p.status === 'em_desenvolvimento').length, 'Em desenvolvimento', 'stat-icon-success')}
-          ${statCard('🔄', myProjects.filter(p => p.status === 'em_continuidade').length, 'Em continuidade', 'stat-icon-navy')}
-          ${statCard('✅', myProjects.filter(p => p.status === 'concluido').length, 'Concluídos', 'stat-icon-orange')}
+          ${statCard('', myProjects.length, 'Projetos criados', 'stat-icon-navy')}
+          ${statCard('', myProjects.filter(p => p.status === 'em_desenvolvimento').length, 'Em desenvolvimento', 'stat-icon-success')}
+          ${statCard('', myProjects.filter(p => p.status === 'em_continuidade').length, 'Em continuidade', 'stat-icon-navy')}
+          ${statCard('', myProjects.filter(p => p.status === 'concluido').length, 'Concluídos', 'stat-icon-orange')}
         </div>
 
         <!-- Seção de projetos -->
@@ -88,7 +88,7 @@ function renderMyProjects() {
             ${myProjects.length
               ? myProjects.map(p => projectCardHTML(p)).join('')
               : `<div class="empty-state" style="grid-column:1/-1">
-                   <div class="empty-state-icon">📂</div>
+                   <div class="empty-state-icon"></div>
                    <div class="empty-state-title">Nenhum projeto ainda</div>
                    <p class="empty-state-desc">Crie seu primeiro projeto e comece a construir algo incrível!</p>
                  </div>`}
@@ -121,21 +121,21 @@ function renderMatch() {
       <div class="dashboard-content">
         <div class="section-header">
           <div>
-            <h2 class="section-title">🎯 Match de Habilidades</h2>
+            <h2 class="section-title">Match de Habilidades</h2>
             <p class="section-subtitle">Projetos que buscam suas habilidades: <strong>${skills.join(', ') || 'nenhuma cadastrada'}</strong></p>
           </div>
         </div>
 
         ${skills.length === 0 ? `
           <div class="empty-state">
-            <div class="empty-state-icon">🎯</div>
+            <div class="empty-state-icon"></div>
             <div class="empty-state-title">Cadastre suas habilidades</div>
             <p class="empty-state-desc">Vá até <strong>Meu Perfil</strong> e adicione suas skills para receber sugestões de projetos compatíveis.</p>
             <button class="btn btn-primary" id="go-to-profile">Ir para Meu Perfil</button>
           </div>
         ` : matches.length === 0 ? `
           <div class="empty-state">
-            <div class="empty-state-icon">🔍</div>
+            <div class="empty-state-icon"></div>
             <div class="empty-state-title">Nenhum match encontrado</div>
             <p class="empty-state-desc">Ainda não há projetos buscando suas habilidades. Volte em breve!</p>
           </div>
@@ -166,7 +166,7 @@ function renderProfile() {
       <div class="dashboard-content">
         <div class="section-header">
           <div>
-            <h2 class="section-title">👤 Meu Perfil</h2>
+            <h2 class="section-title">Meu Perfil</h2>
             <p class="section-subtitle">Gerencie suas informações e habilidades</p>
           </div>
         </div>
@@ -176,7 +176,7 @@ function renderProfile() {
             <div class="profile-avatar">${getInitials(_user.name)}</div>
             <div class="profile-name">${escapeHtml(fullUser.name)}</div>
             <div class="profile-email">${escapeHtml(fullUser.email)}</div>
-            <span class="badge badge-navy" style="margin-bottom:1rem">${fullUser.role === 'aluno' ? '🧑‍💻 Aluno' : fullUser.role}</span>
+            <span class="badge badge-navy" style="margin-bottom:1rem">${fullUser.role === 'aluno' ? 'Aluno' : fullUser.role}</span>
             <div style="margin-top:1rem">
               <div class="text-xs text-muted" style="margin-bottom:0.5rem">Membro desde</div>
               <div class="text-sm font-semibold">${formatDate(fullUser.createdAt)}</div>
@@ -344,7 +344,7 @@ function projectCardHTML(p) {
         ${p.skills.length > 5 ? `<span class="skill-tag">+${p.skills.length - 5}</span>` : ''}
       </div>
       <div class="card-footer" style="margin:-1.25rem;margin-top:0;border-radius:0 0 0.75rem 0.75rem">
-        ${advisor ? `<span class="text-xs text-muted">👨‍🏫 ${escapeHtml(advisor.name)}</span>` : ''}
+        ${advisor ? `<span class="text-xs text-muted">${escapeHtml(advisor.name)}</span>` : ''}
         <button class="btn btn-outline btn-sm btn-view-project" data-id="${p.id}" style="margin-left:auto">Ver detalhes</button>
       </div>
     </div>
@@ -359,7 +359,7 @@ function matchCardHTML(p, matchCount, matchSkills) {
       <div>
         <div class="project-card-meta" style="margin-bottom:0.5rem">
           ${statusBadge(p.status)}
-          <span class="badge badge-orange">🎯 ${matchCount} skill${matchCount > 1 ? 's' : ''} em comum</span>
+          <span class="badge badge-orange">${matchCount} skill${matchCount > 1 ? 's' : ''} em comum</span>
         </div>
         <div class="project-card-title">${escapeHtml(p.title)}</div>
       </div>
@@ -372,7 +372,7 @@ function matchCardHTML(p, matchCount, matchSkills) {
         ).join('')}
       </div>
       <div class="card-footer" style="margin:-1.25rem;margin-top:0;border-radius:0 0 0.75rem 0.75rem">
-        ${owner ? `<span class="text-xs text-muted">👤 ${escapeHtml(owner.name)}</span>` : ''}
+        ${owner ? `<span class="text-xs text-muted">${escapeHtml(owner.name)}</span>` : ''}
         <button class="btn btn-accent btn-sm btn-view-project" data-id="${p.id}" style="margin-left:auto">Ver projeto</button>
       </div>
     </div>
