@@ -47,6 +47,9 @@ const ROLE_ROUTES    = { aluno: 'student', professor: 'professor', coordenador: 
 
 beforeEach((to, from, params) => {
   const session = getSession();
+  
+  // Atualiza exibição do seletor demo pós-navegação
+  setTimeout(updateDemoSwitcher, 0);
 
   // Rotas públicas: se já está logado e tenta ir para login/register → redireciona
   if (PUBLIC_ROUTES.includes(to)) {
@@ -91,3 +94,53 @@ console.info(
   '\n  Professor:   ana.lima@instituicao.edu.br / 123456',
   '\n  Aluno:       lucas.ferreira@aluno.edu.br / 123456'
 );
+
+// ══════════════════════════════════════════════════════════════════════════════
+// Lógica de Modo Demo
+// ══════════════════════════════════════════════════════════════════════════════
+function updateDemoSwitcher() {
+  const session = getSession();
+  const isDemo = localStorage.getItem('obsenac_is_demo') === 'true';
+  const switcher = document.getElementById('demo-switcher');
+  if (session && isDemo) {
+    switcher?.classList.remove('hidden');
+    const select = document.getElementById('demo-role-select');
+    if (select) select.value = session.role;
+  } else {
+    switcher?.classList.add('hidden');
+  }
+}
+
+// Executa no boot inicial
+updateDemoSwitcher();
+
+// Escuta a troca de visão no seletor
+document.getElementById('demo-role-select')?.addEventListener('change', async (e) => {
+  const selectedRole = e.target.value;
+  await switchDemoUser(selectedRole);
+});
+
+async function switchDemoUser(role) {
+  const { get, set, KEYS } = await import('./services/storage.js');
+  const { navigate } = await import('./modules/router.js');
+  const { showToast } = await import('./modules/ui.js');
+  
+  const users = get(KEYS.USERS, []);
+  const emailMap = {
+    aluno: 'lucas.ferreira@aluno.edu.br',
+    professor: 'ana.lima@instituicao.edu.br',
+    coordenador: 'carlos.mendes@instituicao.edu.br'
+  };
+  const targetEmail = emailMap[role];
+  const user = users.find(u => u.email.toLowerCase() === targetEmail.toLowerCase());
+  
+  if (user) {
+    const { password: _pw, ...safeUser } = user;
+    set(KEYS.SESSION, safeUser);
+    
+    showToast('Visão Alterada', `Agora você está visualizando como ${role === 'aluno' ? 'Aluno' : role === 'professor' ? 'Professor' : 'Coordenador'}!`, 'success');
+    
+    const roleRoutes = { aluno: 'student', professor: 'professor', coordenador: 'admin' };
+    navigate(roleRoutes[role]);
+  }
+}

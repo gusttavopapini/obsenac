@@ -57,6 +57,7 @@ export function renderLogin() {
           <span class="form-error" aria-live="polite"></span>
         </div>
         <button type="submit" id="login-submit" class="btn btn-primary btn-full btn-lg">Entrar</button>
+        <button type="button" id="demo-submit" class="btn btn-accent btn-full btn-lg" style="margin-top:0.75rem">Ver Demo</button>
       </form>
 
       <div class="auth-switch" style="margin-top:1.5rem">
@@ -73,6 +74,10 @@ export function renderLogin() {
   document.getElementById('login-form')?.addEventListener('submit', e => {
     e.preventDefault();
     handleLogin();
+  });
+
+  document.getElementById('demo-submit')?.addEventListener('click', () => {
+    handleDemoLogin();
   });
 }
 
@@ -114,4 +119,37 @@ function handleLogin() {
 export function redirectByRole(role) {
   const map = { aluno: 'student', professor: 'professor', coordenador: 'admin' };
   navigate(map[role] || 'student');
+}
+
+function handleDemoLogin() {
+  const btn = document.getElementById('demo-submit');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Carregando Demo…';
+  }
+
+  setTimeout(() => {
+    localStorage.setItem('obsenac_is_demo', 'true');
+
+    import('../services/storage.js').then(({ get, set, KEYS }) => {
+      const users = get(KEYS.USERS, []);
+      const defaultStudent = users.find(u => u.email.toLowerCase() === 'lucas.ferreira@aluno.edu.br');
+      if (defaultStudent) {
+        const { password: _pw, ...safeUser } = defaultStudent;
+        set(KEYS.SESSION, safeUser);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Ver Demo';
+        }
+        showToast('Acesso de Demonstração', 'Você entrou no modo de demonstração como Aluno!', 'success');
+        redirectByRole(safeUser.role);
+      } else {
+        showToast('Erro no Demo', 'Usuário padrão do demo não encontrado.', 'error');
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Ver Demo';
+        }
+      }
+    });
+  }, 400);
 }

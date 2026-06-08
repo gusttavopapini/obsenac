@@ -83,3 +83,16 @@
   .hero-cta .btn { width: 100%; }
   .landing-nav-actions .btn:first-child { display: none; }
 }
+
+@media (max-width: 768px) {
+  .demo-tag {
+    display: none !important;
+  }
+  .demo-switcher {
+    padding: 0.2rem 0.4rem;
+    margin-left: 0.25rem;
+  }
+  .demo-select {
+    font-size: var(--text-xs);
+  }
+}

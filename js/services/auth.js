@@ -84,4 +84,5 @@ export function getSession() {
 /** Remove a sessão atual (logout). */
 export function logout() {
   remove(KEYS.SESSION);
+  localStorage.removeItem('obsenac_is_demo');
 }
