@@ -23,7 +23,7 @@ export function renderLanding() {
         <nav class="landing-nav" aria-label="Navegação principal">
           <div class="landing-nav-brand">
             <span class="landing-nav-logo" aria-hidden="true"></span>
-            <span class="landing-nav-name">PC<span>GPA</span></span>
+            <span class="landing-nav-name">OB<span>SENAC</span></span>
           </div>
           <div class="landing-nav-actions">
             <button id="landing-login-btn"    class="btn btn-ghost"   style="color:rgba(255,255,255,0.8)">Entrar</button>
@@ -36,7 +36,7 @@ export function renderLanding() {
             <span class="hero-eyebrow">Plataforma Institucional v1.0</span>
             <h1 class="hero-h1">Dê <span>continuidade</span> ao que importa na academia</h1>
             <p class="hero-desc">
-              A PCGPA conecta alunos, professores e coordenação para garantir que nenhum projeto acadêmico seja abandonado ao fim do semestre. Gerencie equipes, valide entregas e encontre seu match de habilidades.
+              A OBSENAC conecta alunos, professores e coordenação para garantir que nenhum projeto acadêmico seja abandonado ao fim do semestre. Gerencie equipes, valide entregas e encontre seu match de habilidades.
             </p>
             <div class="hero-cta">
               <button id="hero-start-btn" class="btn btn-accent btn-lg">Começar agora →</button>
@@ -128,7 +128,7 @@ export function renderLanding() {
       </section>
 
       <footer class="landing-footer">
-        <p>© ${new Date().getFullYear()} PCGPA – Plataforma de Continuidade e Gestão de Projetos Acadêmicos. Todos os direitos reservados.</p>
+        <p>© ${new Date().getFullYear()} OBSENAC – Plataforma de Continuidade e Gestão de Projetos Acadêmicos. Todos os direitos reservados.</p>
       </footer>
 
     </div>

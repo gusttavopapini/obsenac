@@ -18,7 +18,7 @@ function authLayout(formHtml, sideTitle, sideDesc) {
         <div class="auth-form-box animate-fadeInUp">
           <div class="auth-logo">
             <span class="auth-logo-icon"></span>
-            <span class="auth-logo-text">PC<span>GPA</span></span>
+            <span class="auth-logo-text">OB<span>SENAC</span></span>
           </div>
           ${formHtml}
         </div>

@@ -5,9 +5,9 @@
  */
 
 const KEYS = {
-  USERS:    'pcgpa_users',
-  PROJECTS: 'pcgpa_projects',
-  SESSION:  'pcgpa_session',
+  USERS:    'obsenac_users',
+  PROJECTS: 'obsenac_projects',
+  SESSION:  'obsenac_session',
 };
 
 /**

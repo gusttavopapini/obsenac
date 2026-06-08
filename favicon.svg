@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .brand-text {
+      font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+      font-weight: 800;
+      font-size: 30px;
+      letter-spacing: -1px;
+    }
+  </style>
+  <text x="32" y="42" text-anchor="middle" class="brand-text">
+    <tspan fill="#0E2040">OB</tspan><tspan fill="#F06A00">S</tspan>
+  </text>
+</svg>

@@ -1,5 +1,5 @@
 /**
- * app.js – Ponto de entrada da SPA PCGPA.
+ * app.js – Ponto de entrada da SPA OBSENAC.
  * Inicializa seed data, registra rotas, configura guards e boot do sistema.
  */
 
@@ -80,7 +80,7 @@ beforeEach((to, from, params) => {
 initRouter();
 
 console.info(
-  '%c🎓 PCGPA%c v1.0 – Plataforma de Continuidade e Gestão de Projetos Acadêmicos',
+  '%c🎓 OBSENAC%c v1.0 – Plataforma de Continuidade e Gestão de Projetos Acadêmicos',
   'font-weight:bold;font-size:14px;color:#1E4080',
   'font-size:12px;color:#6B7280'
 );
