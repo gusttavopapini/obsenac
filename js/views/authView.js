@@ -1,12 +1,11 @@
 /**
- * authView.js – View de Login.
- * Gerencia formulário de login e integração com o auth service.
+ * authView.js – View de Login e Registro.
+ * Gerencia formulários de autenticação e integração com o auth service.
  */
 
 import { navigate }      from '../modules/router.js';
-import { showToast, validateField, clearFormErrors } from '../modules/ui.js';
-import { login } from '../services/auth.js';
-import { getSession }    from '../services/auth.js';
+import { showToast, validateField, clearFormErrors, initTagsInput } from '../modules/ui.js';
+import { login, register, getSession } from '../services/auth.js';
 
 // ── Helper: monta o layout comum Auth (painel + lateral) ─────────────────────
 function authLayout(formHtml, sideTitle, sideDesc) {
@@ -60,8 +59,9 @@ export function renderLogin() {
         <button type="button" id="demo-submit" class="btn btn-accent btn-full btn-lg" style="margin-top:0.75rem">Ver Demo</button>
       </form>
 
-      <div class="auth-switch" style="margin-top:1.5rem">
-        <a id="go-landing">← Voltar ao início</a>
+      <div class="auth-switch" style="margin-top:1.5rem; display: flex; justify-content: space-between;">
+        <a id="go-landing">← Voltar</a>
+        <a id="go-register">Criar conta</a>
       </div>
     `,
     /* sideTitle */ 'Projetos que vivem além do semestre',
@@ -70,6 +70,7 @@ export function renderLogin() {
 
   // ── Listeners ──
   document.getElementById('go-landing')?.addEventListener('click',  () => navigate('landing'));
+  document.getElementById('go-register')?.addEventListener('click', () => navigate('register'));
 
   document.getElementById('login-form')?.addEventListener('submit', e => {
     e.preventDefault();
@@ -81,7 +82,7 @@ export function renderLogin() {
   });
 }
 
-function handleLogin() {
+async function handleLogin() {
   const emailInput = document.getElementById('login-email');
   const passInput  = document.getElementById('login-password');
   const btn        = document.getElementById('login-submit');
@@ -99,9 +100,8 @@ function handleLogin() {
   btn.disabled = true;
   btn.textContent = 'Entrando…';
 
-  // Simulação de latência para UX
-  setTimeout(() => {
-    const result = login(emailInput.value.trim(), passInput.value);
+  try {
+    const result = await login(emailInput.value.trim(), passInput.value);
     btn.disabled = false;
     btn.textContent = 'Entrar';
 
@@ -109,10 +109,119 @@ function handleLogin() {
       showToast('Login realizado!', `Bem-vindo(a), ${result.user.name.split(' ')[0]}!`, 'success');
       redirectByRole(result.user.role);
     } else {
-      showToast('Erro ao entrar', result.error, 'error');
-      validateField(passInput, result.error);
+      if (result.error === 'pending') {
+        showToast('Aguardando aprovação', 'Sua conta ainda não foi aprovada pelo coordenador.', 'warning');
+      } else {
+        showToast('Erro ao entrar', result.error, 'error');
+        validateField(passInput, result.error);
+      }
     }
-  }, 400);
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Entrar';
+    showToast('Erro ao entrar', 'Falha na conexão com o servidor.', 'error');
+  }
+}
+
+// ── REGISTRO ──────────────────────────────────────────────────────────────────
+export function renderRegister() {
+  authLayout(
+    /* formHtml */ `
+      <h1 class="auth-heading">Criar sua conta</h1>
+      <p class="auth-subheading">Cadastre-se na plataforma do OBSENAC</p>
+
+      <form class="auth-form" id="register-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="reg-name">Nome completo <span class="required">*</span></label>
+          <input id="reg-name" class="form-control" type="text" placeholder="Nome completo" required />
+          <span class="form-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-email">E-mail institucional <span class="required">*</span></label>
+          <input id="reg-email" class="form-control" type="email" placeholder="seu@instituicao.edu.br" required />
+          <span class="form-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-role">Perfil <span class="required">*</span></label>
+          <select id="reg-role" class="form-control" required>
+            <option value="aluno">Aluno</option>
+            <option value="professor">Professor</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Senha <span class="required">*</span></label>
+          <input id="reg-password" class="form-control" type="password" placeholder="Mínimo 6 caracteres" required minlength="6" />
+          <span class="form-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Habilidades <span class="text-muted text-sm">(opcional – Enter para adicionar)</span></label>
+          <div class="tags-input-wrapper" id="reg-skills-wrapper">
+            <input class="tags-input-field" id="reg-skills-field" type="text" placeholder="ex: Python, React…" />
+          </div>
+        </div>
+        <button type="submit" id="register-submit" class="btn btn-primary btn-full btn-lg">Cadastrar</button>
+      </form>
+
+      <div class="auth-switch" style="margin-top:1.5rem">
+        <a id="go-login">← Voltar ao login</a>
+      </div>
+    `,
+    /* sideTitle */ 'Faça parte do ecossistema científico',
+    /* sideDesc  */ 'Cadastre-se para compartilhar seus projetos ou colaborar em pesquisas em andamento.'
+  );
+
+  const wrapper = document.getElementById('reg-skills-wrapper');
+  let tagsInput = null;
+  if (wrapper) tagsInput = initTagsInput(wrapper, []);
+
+  document.getElementById('go-login')?.addEventListener('click', () => navigate('login'));
+
+  document.getElementById('register-form')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    await handleRegister(tagsInput);
+  });
+}
+
+async function handleRegister(tagsInput) {
+  const nameInput  = document.getElementById('reg-name');
+  const emailInput = document.getElementById('reg-email');
+  const passInput  = document.getElementById('reg-password');
+  const roleInput  = document.getElementById('reg-role');
+  const btn        = document.getElementById('register-submit');
+  clearFormErrors(document.getElementById('register-form'));
+
+  let valid = true;
+  if (!nameInput.value.trim())  { validateField(nameInput, 'Nome obrigatório.');  valid = false; }
+  if (!emailInput.value.trim()) { validateField(emailInput, 'E-mail obrigatório.'); valid = false; }
+  if (passInput.value.length < 6) { validateField(passInput, 'A senha deve ter no mínimo 6 caracteres.'); valid = false; }
+  
+  if (!valid) return;
+
+  btn.disabled = true;
+  btn.textContent = 'Cadastrando...';
+
+  try {
+    const result = await register({
+      name:     nameInput.value.trim(),
+      email:    emailInput.value.trim(),
+      password: passInput.value,
+      role:     roleInput.value,
+      skills:   tagsInput ? tagsInput.getValue() : [],
+    });
+    btn.disabled = false;
+    btn.textContent = 'Cadastrar';
+
+    if (result.success) {
+      showToast('Conta criada!', 'Seu cadastro foi enviado e aguarda aprovação da coordenação.', 'success');
+      navigate('login');
+    } else {
+      showToast('Erro no cadastro', result.error, 'error');
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Cadastrar';
+    showToast('Erro no cadastro', 'Falha na conexão.', 'error');
+  }
 }
 
 // ── Helper: redireciona conforme role ─────────────────────────────────────────
@@ -121,35 +230,42 @@ export function redirectByRole(role) {
   navigate(map[role] || 'student');
 }
 
-function handleDemoLogin() {
+async function handleDemoLogin() {
   const btn = document.getElementById('demo-submit');
   if (btn) {
     btn.disabled = true;
     btn.textContent = 'Carregando Demo…';
   }
 
-  setTimeout(() => {
+  try {
     localStorage.setItem('obsenac_is_demo', 'true');
-
-    import('../services/storage.js').then(({ get, set, KEYS }) => {
-      const users = get(KEYS.USERS, []);
-      const defaultStudent = users.find(u => u.email.toLowerCase() === 'lucas.ferreira@aluno.edu.br');
-      if (defaultStudent) {
-        const { password: _pw, ...safeUser } = defaultStudent;
-        set(KEYS.SESSION, safeUser);
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = 'Ver Demo';
-        }
-        showToast('Acesso de Demonstração', 'Você entrou no modo de demonstração como Aluno!', 'success');
-        redirectByRole(safeUser.role);
-      } else {
-        showToast('Erro no Demo', 'Usuário padrão do demo não encontrado.', 'error');
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = 'Ver Demo';
-        }
+    const { getAllUsers } = await import('../services/userService.js');
+    const users = await getAllUsers();
+    
+    // Procura o aluno padrão
+    const defaultStudent = users.find(u => u.email.toLowerCase() === 'lucas.ferreira@aluno.edu.br');
+    if (defaultStudent) {
+      const { set, KEYS } = await import('../services/storage.js');
+      set(KEYS.SESSION, defaultStudent);
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Ver Demo';
       }
-    });
-  }, 400);
+      showToast('Acesso de Demonstração', 'Você entrou no modo de demonstração como Aluno!', 'success');
+      redirectByRole(defaultStudent.role);
+    } else {
+      showToast('Erro no Demo', 'Usuário padrão do demo não encontrado no Firestore.', 'error');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'Ver Demo';
+      }
+    }
+  } catch (e) {
+    showToast('Erro no Demo', 'Falha ao buscar usuários do demo.', 'error');
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Ver Demo';
+    }
+  }
 }
+

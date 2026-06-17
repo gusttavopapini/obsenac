@@ -14,12 +14,12 @@ import {
 
 let _user = null;
 
-export function renderProfessor() {
+export async function renderProfessor() {
   _user = getSession();
   if (!_user) { navigate('login'); return; }
 
   setupNavbar();
-  renderTeams();
+  await renderTeams();
 }
 
 function setupNavbar() {
@@ -47,10 +47,10 @@ function setActiveNav(id) {
 }
 
 // ── TELA: Minhas Equipes ──────────────────────────────────────────────────────
-function renderTeams() {
+async function renderTeams() {
   setActiveNav('nl-teams');
-  const myProjects = getProjectsByAdvisor(_user.id);
-  const users      = getAllUsers();
+  const myProjects = await getProjectsByAdvisor(_user.id);
+  const users      = await getAllUsers();
 
   document.getElementById('view-root').innerHTML = `
     <div class="dashboard-root">
@@ -130,21 +130,21 @@ function bindTeamActions() {
     btn.addEventListener('click', () => navigate('project', { id: btn.dataset.id }));
   });
   document.querySelectorAll('.btn-validate').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const ok = confirm(`Confirma a validação de continuidade do projeto "${btn.dataset.title}"?`);
       if (!ok) return;
-      validateContinuity(btn.dataset.id, _user.id, _user.name);
+      await validateContinuity(btn.dataset.id, _user.id, _user.name);
       showToast('Continuidade validada!', `O projeto "${btn.dataset.title}" foi aprovado para o próximo semestre.`, 'success');
-      renderTeams();
+      await renderTeams();
     });
   });
 }
 
 // ── TELA: Todos os Projetos ───────────────────────────────────────────────────
-function renderAllProjects() {
+async function renderAllProjects() {
   setActiveNav('nl-all-projects');
-  const allProjects = getAllProjects();
-  const users       = getAllUsers();
+  const allProjects = await getAllProjects();
+  const users       = await getAllUsers();
 
   document.getElementById('view-root').innerHTML = `
     <div class="dashboard-root">
@@ -214,3 +214,4 @@ function statusBadge(status) {
   };
   return `<span class="badge ${map[status] || 'badge-gray'}">${STATUS_LABELS[status] || status}</span>`;
 }
+

@@ -1,8 +1,8 @@
 /**
- * auth.js – Serviço de autenticação e gerenciamento de sessão.
- * Lida com login, cadastro, logout e recuperação do usuário logado.
+ * auth.js – Serviço de autenticação e gerenciamento de sessão no Firestore.
  */
 
+import { db, collection, getDocs, doc, setDoc, query, where } from './firebase.js';
 import { get, set, remove, KEYS } from './storage.js';
 
 // ── Constantes ────────────────────────────────────────────────────────────────
@@ -16,11 +16,6 @@ export function isInstitutionalEmail(email) {
   return INSTITUTIONAL_DOMAINS.some(domain => email.toLowerCase().endsWith(domain));
 }
 
-/** Gera um ID único simples baseado em timestamp + random. */
-function generateId() {
-  return `u${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
-}
-
 // ── Auth API ──────────────────────────────────────────────────────────────────
 
 /**
@@ -29,19 +24,31 @@ function generateId() {
  * @param {string} password
  * @returns {{ success: boolean, user?: object, error?: string }}
  */
-export function login(email, password) {
-  const users = get(KEYS.USERS, []);
-  const user  = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+export async function login(email, password) {
+  try {
+    const q = query(collection(db, 'users'), where('email', '==', email.toLowerCase().trim()));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      return { success: false, error: 'E-mail não encontrado.' };
+    }
 
-  if (!user)              return { success: false, error: 'E-mail não encontrado.' };
-  if (user.password !== password) return { success: false, error: 'Senha incorreta.' };
-  if (user.status === 'pending')  return { success: false, error: 'pending' };
-  if (user.status === 'blocked')  return { success: false, error: 'Sua conta foi bloqueada. Entre em contato com a coordenação.' };
+    let user = null;
+    querySnapshot.forEach((doc) => {
+      user = doc.data();
+    });
 
-  // Salva sessão (sem a senha)
-  const { password: _pw, ...safeUser } = user;
-  set(KEYS.SESSION, safeUser);
-  return { success: true, user: safeUser };
+    if (user.password !== password) return { success: false, error: 'Senha incorreta.' };
+    if (user.status === 'pending')  return { success: false, error: 'pending' };
+    if (user.status === 'blocked')  return { success: false, error: 'Sua conta foi bloqueada. Entre em contato com a coordenação.' };
+
+    // Salva sessão (sem a senha)
+    const { password: _pw, ...safeUser } = user;
+    set(KEYS.SESSION, safeUser);
+    return { success: true, user: safeUser };
+  } catch (e) {
+    console.error('[Auth] Erro ao fazer login:', e);
+    return { success: false, error: 'Erro de conexão com o banco de dados.' };
+  }
 }
 
 /**
@@ -49,29 +56,36 @@ export function login(email, password) {
  * @param {{ name, email, password, role, skills? }} data
  * @returns {{ success: boolean, error?: string }}
  */
-export function register(data) {
+export async function register(data) {
   if (!isInstitutionalEmail(data.email)) {
     return { success: false, error: `Use um e-mail institucional. Domínios aceitos: ${INSTITUTIONAL_DOMAINS.join(', ')}` };
   }
 
-  const users = get(KEYS.USERS, []);
-  if (users.find(u => u.email.toLowerCase() === data.email.toLowerCase())) {
-    return { success: false, error: 'Este e-mail já está cadastrado.' };
+  try {
+    const q = query(collection(db, 'users'), where('email', '==', data.email.toLowerCase().trim()));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      return { success: false, error: 'Este e-mail já está cadastrado.' };
+    }
+
+    const id = `u${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+    const newUser = {
+      id,
+      name:      data.name.trim(),
+      email:     data.email.toLowerCase().trim(),
+      password:  data.password,
+      role:      data.role || 'aluno',
+      status:    'pending',   // aguarda aprovação do coordenador
+      skills:    data.skills || [],
+      createdAt: new Date().toISOString(),
+    };
+
+    await setDoc(doc(db, 'users', id), newUser);
+    return { success: true };
+  } catch (e) {
+    console.error('[Auth] Erro ao registrar:', e);
+    return { success: false, error: 'Erro ao registrar usuário no banco de dados.' };
   }
-
-  const newUser = {
-    id:        generateId(),
-    name:      data.name.trim(),
-    email:     data.email.toLowerCase().trim(),
-    password:  data.password,
-    role:      data.role || 'aluno',
-    status:    'pending',   // aguarda aprovação do coordenador
-    skills:    data.skills || [],
-    createdAt: new Date().toISOString(),
-  };
-
-  set(KEYS.USERS, [...users, newUser]);
-  return { success: true };
 }
 
 /**

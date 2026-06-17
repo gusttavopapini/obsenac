@@ -1,22 +1,22 @@
 /**
- * adminView.js – Painel Administrativo do Coordenador.
+ * adminView.js – Painel Administrativo do Coordenador no Firestore.
  * Funcionalidades: gestão de usuários (aprovar/bloquear), métricas gerais, lista de projetos.
  */
 
 import { navigate }        from '../modules/router.js';
 import { showToast, escapeHtml, formatDate, getInitials, openModal, closeModal, initTagsInput, validateField, clearFormErrors } from '../modules/ui.js';
 import { getSession, logout } from '../services/auth.js';
-import { getAllUsers, setUserStatus, createUserByAdmin } from '../services/userService.js';
+import { getAllUsers, setUserStatus, createUserByAdmin, deleteUser, updateUserByAdmin, getUserById } from '../services/userService.js';
 import { getMetrics, getAllProjects, STATUS_LABELS } from '../services/projectService.js';
 
 let _user = null;
 
-export function renderAdmin() {
+export async function renderAdmin() {
   _user = getSession();
   if (!_user) { navigate('login'); return; }
 
   setupNavbar();
-  renderOverview();
+  await renderOverview();
 }
 
 function setupNavbar() {
@@ -46,10 +46,10 @@ function setActiveNav(id) {
 }
 
 // ── TELA: Visão Geral (Métricas) ─────────────────────────────────────────────
-function renderOverview() {
+async function renderOverview() {
   setActiveNav('nl-overview');
-  const metrics = getMetrics();
-  const users   = getAllUsers();
+  const metrics = await getMetrics();
+  const users   = await getAllUsers();
   const pending = users.filter(u => u.status === 'pending');
 
   document.getElementById('view-root').innerHTML = `
@@ -123,9 +123,9 @@ function renderOverview() {
 }
 
 // ── TELA: Usuários ────────────────────────────────────────────────────────────
-function renderUsers() {
+async function renderUsers() {
   setActiveNav('nl-users');
-  const users = getAllUsers().filter(u => u.id !== _user.id);
+  const users = (await getAllUsers()).filter(u => u.id !== _user.id);
 
   document.getElementById('view-root').innerHTML = `
     <div class="dashboard-root">
@@ -162,13 +162,15 @@ function renderUsers() {
                     <td>${userStatusBadge(u.status)}</td>
                     <td class="text-sm">${formatDate(u.createdAt)}</td>
                     <td>
-                      <div style="display:flex;gap:0.5rem">
+                      <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
                         ${u.status !== 'approved'
                           ? `<button class="btn btn-success btn-sm btn-approve-user" data-id="${u.id}" data-name="${escapeHtml(u.name)}">Aprovar</button>`
                           : ''}
                         ${u.status !== 'blocked'
                           ? `<button class="btn btn-danger btn-sm btn-block-user" data-id="${u.id}" data-name="${escapeHtml(u.name)}">Bloquear</button>`
                           : `<button class="btn btn-outline btn-sm btn-approve-user" data-id="${u.id}" data-name="${escapeHtml(u.name)}">Desbloquear</button>`}
+                        <button class="btn btn-outline btn-sm btn-edit-user" data-id="${u.id}">Editar</button>
+                        <button class="btn btn-danger btn-sm btn-delete-user" data-id="${u.id}" data-name="${escapeHtml(u.name)}">Excluir</button>
                       </div>
                     </td>
                   </tr>
@@ -186,10 +188,10 @@ function renderUsers() {
 }
 
 // ── TELA: Projetos ────────────────────────────────────────────────────────────
-function renderProjects() {
+async function renderProjects() {
   setActiveNav('nl-projects');
-  const projects = getAllProjects();
-  const users    = getAllUsers();
+  const projects = await getAllProjects();
+  const users    = await getAllUsers();
 
   document.getElementById('view-root').innerHTML = `
     <div class="dashboard-root">
@@ -244,33 +246,57 @@ function renderProjects() {
   });
 }
 
-// ── Bind: ações de aprovação/bloqueio ─────────────────────────────────────────
+// ── Bind: ações de aprovação/bloqueio/edição/exclusão ─────────────────────────
 function bindUserActions() {
   document.querySelectorAll('.btn-approve-user').forEach(btn => {
-    btn.addEventListener('click', () => {
-      setUserStatus(btn.dataset.id, 'approved');
+    btn.addEventListener('click', async () => {
+      await setUserStatus(btn.dataset.id, 'approved');
       showToast('Usuário aprovado!', `${btn.dataset.name} agora tem acesso à plataforma.`, 'success');
-      rerenderCurrentTab();
+      await rerenderCurrentTab();
     });
   });
   document.querySelectorAll('.btn-block-user').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       const ok = confirm(`Bloquear o usuário "${btn.dataset.name}"?`);
       if (!ok) return;
-      setUserStatus(btn.dataset.id, 'blocked');
+      await setUserStatus(btn.dataset.id, 'blocked');
       showToast('Usuário bloqueado', `${btn.dataset.name} foi bloqueado.`, 'warning');
-      rerenderCurrentTab();
+      await rerenderCurrentTab();
+    });
+  });
+  document.querySelectorAll('.btn-delete-user').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const ok = confirm(`Tem certeza que deseja excluir o usuário "${btn.dataset.name}"? Todos os dados associados serão perdidos.`);
+      if (!ok) return;
+      const success = await deleteUser(btn.dataset.id);
+      if (success) {
+        showToast('Usuário excluído', `${btn.dataset.name} foi removido.`, 'success');
+        await rerenderCurrentTab();
+      } else {
+        showToast('Erro ao excluir usuário', '', 'error');
+      }
+    });
+  });
+  document.querySelectorAll('.btn-edit-user').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const userId = btn.dataset.id;
+      const userToEdit = await getUserById(userId);
+      if (!userToEdit) {
+        showToast('Usuário não encontrado', '', 'error');
+        return;
+      }
+      openEditUserModal(userToEdit);
     });
   });
 }
 
-function rerenderCurrentTab() {
+async function rerenderCurrentTab() {
   const active = document.querySelector('.nav-link.active');
-  if (!active) return renderOverview();
+  if (!active) return await renderOverview();
   const view = active.dataset.view;
-  if (view === 'users')    renderUsers();
-  else if (view === 'projects') renderProjects();
-  else renderOverview();
+  if (view === 'users')    await renderUsers();
+  else if (view === 'projects') await renderProjects();
+  else await renderOverview();
 }
 
 // ── MODAL: Criar Usuário ──────────────────────────────────────────────────────
@@ -297,6 +323,7 @@ function openCreateUserModal() {
           <select id="cu-role" class="form-control" required>
             <option value="aluno">Aluno</option>
             <option value="professor">Professor</option>
+            <option value="coordenador">Coordenador</option>
           </select>
         </div>
         <div class="form-group">
@@ -323,7 +350,7 @@ function openCreateUserModal() {
   if (wrapper) tagsInput = initTagsInput(wrapper, []);
 
   document.getElementById('cancel-create-user')?.addEventListener('click', closeModal);
-  document.getElementById('submit-create-user')?.addEventListener('click', () => {
+  document.getElementById('submit-create-user')?.addEventListener('click', async () => {
     const nameInput  = document.getElementById('cu-name');
     const emailInput = document.getElementById('cu-email');
     const passInput  = document.getElementById('cu-password');
@@ -342,25 +369,127 @@ function openCreateUserModal() {
     btn.disabled = true;
     btn.textContent = 'Cadastrando...';
 
-    setTimeout(() => {
-      const result = createUserByAdmin({
-        name:     nameInput.value.trim(),
-        email:    emailInput.value.trim(),
-        password: passInput.value,
-        role:     roleInput.value,
-        skills:   tagsInput ? tagsInput.getValue() : [],
-      });
+    const result = await createUserByAdmin({
+      name:     nameInput.value.trim(),
+      email:    emailInput.value.trim(),
+      password: passInput.value,
+      role:     roleInput.value,
+      skills:   tagsInput ? tagsInput.getValue() : [],
+    });
 
-      if (result.success) {
-        showToast('Usuário Cadastrado', `${nameInput.value.trim()} foi cadastrado com sucesso.`, 'success');
-        closeModal();
-        renderUsers();
-      } else {
-        btn.disabled = false;
-        btn.textContent = 'Cadastrar';
-        showToast('Erro no cadastro', result.error, 'error');
-      }
-    }, 400);
+    if (result.success) {
+      showToast('Usuário Cadastrado', `${nameInput.value.trim()} foi cadastrado com sucesso.`, 'success');
+      closeModal();
+      await renderUsers();
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Cadastrar';
+      showToast('Erro no cadastro', result.error, 'error');
+    }
+  });
+}
+
+// ── MODAL: Editar Usuário ─────────────────────────────────────────────────────
+function openEditUserModal(u) {
+  openModal(`
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-title">Editar Usuário</h2>
+      <p class="modal-subtitle">Atualize as informações do perfil do usuário</p>
+    </div>
+    <div class="modal-body">
+      <form id="edit-user-form" class="auth-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="eu-name">Nome completo <span class="required">*</span></label>
+          <input id="eu-name" class="form-control" type="text" value="${escapeHtml(u.name)}" required />
+          <span class="form-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="eu-email">E-mail institucional <span class="required">*</span></label>
+          <input id="eu-email" class="form-control" type="email" value="${escapeHtml(u.email)}" required />
+          <span class="form-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="eu-role">Perfil <span class="required">*</span></label>
+          <select id="eu-role" class="form-control" required>
+            <option value="aluno" ${u.role === 'aluno' ? 'selected' : ''}>Aluno</option>
+            <option value="professor" ${u.role === 'professor' ? 'selected' : ''}>Professor</option>
+            <option value="coordenador" ${u.role === 'coordenador' ? 'selected' : ''}>Coordenador</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="eu-status">Status <span class="required">*</span></label>
+          <select id="eu-status" class="form-control" required>
+            <option value="approved" ${u.status === 'approved' ? 'selected' : ''}>Ativo</option>
+            <option value="pending" ${u.status === 'pending' ? 'selected' : ''}>Pendente</option>
+            <option value="blocked" ${u.status === 'blocked' ? 'selected' : ''}>Bloqueado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="eu-password">Nova Senha <span class="text-muted text-sm">(deixe em branco para manter)</span></label>
+          <input id="eu-password" class="form-control" type="password" placeholder="Nova senha" minlength="6" />
+          <span class="form-error" aria-live="polite"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Habilidades <span class="text-muted text-sm">(Enter para adicionar)</span></label>
+          <div class="tags-input-wrapper" id="eu-skills-wrapper">
+            <input class="tags-input-field" id="eu-skills-field" type="text" placeholder="ex: Python, React…" />
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="cancel-edit-user">Cancelar</button>
+      <button class="btn btn-accent" id="submit-edit-user">Salvar</button>
+    </div>
+  `);
+
+  const wrapper = document.getElementById('eu-skills-wrapper');
+  let tagsInput = null;
+  if (wrapper) tagsInput = initTagsInput(wrapper, [...(u.skills || [])]);
+
+  document.getElementById('cancel-edit-user')?.addEventListener('click', closeModal);
+  document.getElementById('submit-edit-user')?.addEventListener('click', async () => {
+    const nameInput  = document.getElementById('eu-name');
+    const emailInput = document.getElementById('eu-email');
+    const passInput  = document.getElementById('eu-password');
+    const roleInput  = document.getElementById('eu-role');
+    const statusInput = document.getElementById('eu-status');
+    const form       = document.getElementById('edit-user-form');
+    clearFormErrors(form);
+
+    let valid = true;
+    if (!nameInput.value.trim())  { validateField(nameInput, 'Nome obrigatório.');  valid = false; }
+    if (!emailInput.value.trim()) { validateField(emailInput, 'E-mail obrigatório.'); valid = false; }
+    if (passInput.value && passInput.value.length < 6) { validateField(passInput, 'A senha deve ter no mínimo 6 caracteres.'); valid = false; }
+    
+    if (!valid) return;
+
+    const btn = document.getElementById('submit-edit-user');
+    btn.disabled = true;
+    btn.textContent = 'Salvando...';
+
+    const updates = {
+      name:     nameInput.value.trim(),
+      email:    emailInput.value.trim(),
+      role:     roleInput.value,
+      status:   statusInput.value,
+      skills:   tagsInput ? tagsInput.getValue() : u.skills || []
+    };
+
+    if (passInput.value.trim()) {
+      updates.password = passInput.value;
+    }
+
+    const success = await updateUserByAdmin(u.id, updates);
+    if (success) {
+      showToast('Usuário Atualizado', `${updates.name} foi atualizado com sucesso.`, 'success');
+      closeModal();
+      await renderUsers();
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Salvar';
+      showToast('Erro ao atualizar', 'Não foi possível salvar as alterações.', 'error');
+    }
   });
 }
 
@@ -427,3 +556,4 @@ function chartBarHTML(metrics) {
     `).join('')}
   </div>`;
 }
+

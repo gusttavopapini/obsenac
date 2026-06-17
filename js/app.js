@@ -10,7 +10,7 @@ import { initModal }               from './modules/ui.js';
 
 // ── Views ─────────────────────────────────────────────────────────────────────
 import { renderLanding }           from './views/landingView.js';
-import { renderLogin, redirectByRole } from './views/authView.js';
+import { renderLogin, renderRegister, redirectByRole } from './views/authView.js';
 import { renderStudent }           from './views/studentView.js';
 import { renderProfessor }         from './views/professorView.js';
 import { renderAdmin }             from './views/adminView.js';
@@ -31,6 +31,7 @@ initModal();
 // ══════════════════════════════════════════════════════════════════════════════
 route('landing',  () => renderLanding());
 route('login',    () => renderLogin());
+route('register', () => renderRegister());
 
 route('student',   () => renderStudent());
 route('professor', () => renderProfessor());
@@ -42,7 +43,7 @@ route('project',   (params) => renderProjectDetail(params));
 // ══════════════════════════════════════════════════════════════════════════════
 // 4) Guard de navegação – protege rotas autenticadas e redireciona
 // ══════════════════════════════════════════════════════════════════════════════
-const PUBLIC_ROUTES  = ['landing', 'login'];
+const PUBLIC_ROUTES  = ['landing', 'login', 'register'];
 const ROLE_ROUTES    = { aluno: 'student', professor: 'professor', coordenador: 'admin' };
 
 beforeEach((to, from, params) => {
@@ -51,13 +52,14 @@ beforeEach((to, from, params) => {
   // Atualiza exibição do seletor demo pós-navegação
   setTimeout(updateDemoSwitcher, 0);
 
-  // Rotas públicas: se já está logado e tenta ir para login/register → redireciona
+  // Rotas públicas: se já está logado e tenta ir para login/register/register → redireciona
   if (PUBLIC_ROUTES.includes(to)) {
-    if (session && to === 'login') {
+    if (session && (to === 'login' || to === 'register')) {
       return ROLE_ROUTES[session.role] || 'student';
     }
     return true; // permite acesso
   }
+
 
   // Rota de projeto: exige autenticação, mas qualquer role pode ver
   if (to === 'project') {

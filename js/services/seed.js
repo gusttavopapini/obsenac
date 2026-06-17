@@ -1,9 +1,4 @@
-/**
- * seed.js – Dados iniciais (seed) da plataforma.
- * Popula o localStorage na primeira execução com usuários e projetos de exemplo.
- */
-
-import { get, set, KEYS } from './storage.js';
+import { db, collection, getDocs, doc, setDoc } from './firebase.js';
 
 // ── Usuários de exemplo ───────────────────────────────────────────────────────
 const SEED_USERS = [
@@ -255,20 +250,36 @@ const SEED_PROJECTS = [
         authorId: 'u3',
       },
     ],
-  }
+  },
 ];
 
 /**
  * Inicializa o banco de dados local se ainda não existir.
  * Chamado uma única vez na inicialização do app.
  */
-export function seedDatabase() {
-  if (!get(KEYS.USERS)) {
-    set(KEYS.USERS, SEED_USERS);
-    console.info('[Seed] Usuários inicializados:', SEED_USERS.length);
-  }
-  if (!get(KEYS.PROJECTS)) {
-    set(KEYS.PROJECTS, SEED_PROJECTS);
-    console.info('[Seed] Projetos inicializados:', SEED_PROJECTS.length);
+export async function seedDatabase() {
+  try {
+    const usersCol = collection(db, 'users');
+    const usersSnapshot = await getDocs(usersCol);
+    if (usersSnapshot.empty) {
+      console.info('[Seed] Populando usuários no Firestore...');
+      for (const u of SEED_USERS) {
+        await setDoc(doc(db, 'users', u.id), u);
+      }
+      console.info('[Seed] Usuários inicializados no Firestore.');
+    }
+
+    const projectsCol = collection(db, 'projects');
+    const projectsSnapshot = await getDocs(projectsCol);
+    if (projectsSnapshot.empty) {
+      console.info('[Seed] Populando projetos no Firestore...');
+      for (const p of SEED_PROJECTS) {
+        await setDoc(doc(db, 'projects', p.id), p);
+      }
+      console.info('[Seed] Projetos inicializados no Firestore.');
+    }
+  } catch (e) {
+    console.error('[Seed] Erro ao popular banco de dados (provavelmente erro de autenticação ou falta de configuração do Firebase):', e);
   }
 }
+

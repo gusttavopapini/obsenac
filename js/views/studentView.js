@@ -1,13 +1,12 @@
 /**
- * studentView.js – Dashboard do Aluno.
+ * studentView.js – Dashboard do Aluno no Firestore.
  * Funcionalidades: perfil, meus projetos, criar projeto, sistema de match.
  */
 
 import { navigate }         from '../modules/router.js';
 import { showToast, openModal, closeModal, initTagsInput, escapeHtml, formatDate, getInitials } from '../modules/ui.js';
 import { getSession }       from '../services/auth.js';
-import { updateProfile }    from '../services/userService.js';
-import { getAllUsers }       from '../services/userService.js';
+import { updateProfile, getAllUsers }    from '../services/userService.js';
 import {
   getAllProjects, getProjectsByOwner, getMatchingProjects,
   createProject, STATUS_LABELS,
@@ -17,12 +16,12 @@ import { set, KEYS, get }   from '../services/storage.js';
 let _user = null;
 
 // ── Entrada principal ─────────────────────────────────────────────────────────
-export function renderStudent() {
+export async function renderStudent() {
   _user = getSession();
   if (!_user) { navigate('login'); return; }
 
   setupNavbar();
-  renderMyProjects(); // aba padrão
+  await renderMyProjects(); // aba padrão
 }
 
 // ── Navbar ────────────────────────────────────────────────────────────────────
@@ -53,9 +52,10 @@ function setActiveNav(id) {
 }
 
 // ── TELA: Meus Projetos ───────────────────────────────────────────────────────
-function renderMyProjects() {
+async function renderMyProjects() {
   setActiveNav('nl-projects');
-  const myProjects = getProjectsByOwner(_user.id);
+  const myProjects = await getProjectsByOwner(_user.id);
+  const users = await getAllUsers();
 
   document.getElementById('view-root').innerHTML = `
     <div class="dashboard-root">
@@ -86,7 +86,7 @@ function renderMyProjects() {
           </div>
           <div class="projects-grid" id="my-projects-grid">
             ${myProjects.length
-              ? myProjects.map(p => projectCardHTML(p)).join('')
+              ? myProjects.map(p => projectCardHTML(p, users)).join('')
               : `<div class="empty-state" style="grid-column:1/-1">
                    <div class="empty-state-icon"></div>
                    <div class="empty-state-title">Nenhum projeto ainda</div>
@@ -107,14 +107,14 @@ function renderMyProjects() {
 }
 
 // ── TELA: Match ───────────────────────────────────────────────────────────────
-function renderMatch() {
+async function renderMatch() {
   setActiveNav('nl-match');
 
   // Busca sessão atualizada (para pegar skills atualizadas)
-  const users   = getAllUsers();
+  const users   = await getAllUsers();
   const fullUser = users.find(u => u.id === _user.id);
   const skills  = fullUser?.skills || _user.skills || [];
-  const matches = getMatchingProjects(skills, _user.id);
+  const matches = await getMatchingProjects(skills, _user.id);
 
   document.getElementById('view-root').innerHTML = `
     <div class="dashboard-root">
@@ -141,7 +141,7 @@ function renderMatch() {
           </div>
         ` : `
           <div class="projects-grid">
-            ${matches.map(({ project, matchCount, matchSkills }) => matchCardHTML(project, matchCount, matchSkills)).join('')}
+            ${matches.map(({ project, matchCount, matchSkills }) => matchCardHTML(project, matchCount, matchSkills, users)).join('')}
           </div>
         `}
       </div>
@@ -155,9 +155,9 @@ function renderMatch() {
 }
 
 // ── TELA: Perfil ──────────────────────────────────────────────────────────────
-function renderProfile() {
+async function renderProfile() {
   setActiveNav('nl-profile');
-  const users    = getAllUsers();
+  const users    = await getAllUsers();
   const fullUser = users.find(u => u.id === _user.id) || _user;
   const skills   = fullUser.skills || [];
 
@@ -213,18 +213,17 @@ function renderProfile() {
   let tagsCtrl  = null;
   if (wrapper) tagsCtrl = initTagsInput(wrapper, [...skills]);
 
-  document.getElementById('profile-form')?.addEventListener('submit', e => {
+  document.getElementById('profile-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const newName   = document.getElementById('pf-name').value.trim();
     const newSkills = tagsCtrl ? tagsCtrl.getValue() : skills;
     if (!newName) { showToast('Nome obrigatório.', '', 'error'); return; }
 
-    updateProfile(_user.id, { name: newName, skills: newSkills });
+    await updateProfile(_user.id, { name: newName, skills: newSkills });
     // Atualiza sessão local
-    import('../services/storage.js').then(({ get, set, KEYS }) => {
-      const sess = get(KEYS.SESSION);
-      if (sess) { sess.name = newName; sess.skills = newSkills; set(KEYS.SESSION, sess); _user = sess; }
-    });
+    const sess = get(KEYS.SESSION);
+    if (sess) { sess.name = newName; sess.skills = newSkills; set(KEYS.SESSION, sess); _user = sess; }
+    
     showToast('Perfil atualizado!', 'Suas informações foram salvas.', 'success');
     document.getElementById('nav-username').textContent = newName.split(' ')[0];
     document.getElementById('nav-avatar').textContent   = getInitials(newName);
@@ -232,7 +231,14 @@ function renderProfile() {
 }
 
 // ── MODAL: Criar Projeto ──────────────────────────────────────────────────────
-function openCreateProjectModal() {
+async function openCreateProjectModal() {
+  const usersList = await getAllUsers();
+  const professors = usersList.filter(u => u.role === 'professor');
+  
+  const advisorOptions = professors.map(p => `
+    <option value="${p.id}">${escapeHtml(p.name)}</option>
+  `).join('');
+
   openModal(`
     <div class="modal-header">
       <h2 class="modal-title" id="modal-title">Novo Projeto</h2>
@@ -263,6 +269,13 @@ function openCreateProjectModal() {
           <input id="cp-semester" class="form-control" type="text" placeholder="Ex: 2025.1" />
         </div>
         <div class="form-group">
+          <label class="form-label" for="cp-advisor">Professor Orientador</label>
+          <select id="cp-advisor" class="form-control">
+            <option value="">Nenhum</option>
+            ${advisorOptions}
+          </select>
+        </div>
+        <div class="form-group">
           <label class="form-label">Habilidades necessárias <span class="text-muted text-sm">(Enter para adicionar)</span></label>
           <div class="tags-input-wrapper" id="cp-skills-wrapper">
             <input class="tags-input-field" id="cp-skills-field" type="text" placeholder="ex: React, Python…" />
@@ -284,20 +297,21 @@ function openCreateProjectModal() {
   const tagsCtrl = wrapper ? initTagsInput(wrapper, []) : null;
 
   document.getElementById('cancel-create')?.addEventListener('click', closeModal);
-  document.getElementById('submit-create')?.addEventListener('click', () => {
+  document.getElementById('submit-create')?.addEventListener('click', async () => {
     const title     = document.getElementById('cp-title').value.trim();
     const objective = document.getElementById('cp-objective').value.trim();
     const status    = document.getElementById('cp-status').value;
     const semester  = document.getElementById('cp-semester').value.trim();
+    const advisorId = document.getElementById('cp-advisor').value || null;
     const skills    = tagsCtrl ? tagsCtrl.getValue() : [];
 
     if (!title)     { showToast('Título obrigatório', '', 'error'); return; }
     if (!objective) { showToast('Objetivo obrigatório', '', 'error'); return; }
 
-    createProject({ title, objective, status, skills, semester, ownerId: _user.id });
+    await createProject({ title, objective, status, skills, semester, ownerId: _user.id, advisorId });
     showToast('Projeto criado!', `"${title}" foi adicionado à plataforma.`, 'success');
     closeModal();
-    renderMyProjects();
+    await renderMyProjects();
   });
 }
 
@@ -326,8 +340,7 @@ function statusBadge(status) {
   return `<span class="badge ${map[status] || 'badge-gray'}">${STATUS_LABELS[status] || status}</span>`;
 }
 
-function projectCardHTML(p) {
-  const users = getAllUsers();
+function projectCardHTML(p, users) {
   const advisor = p.advisorId ? users.find(u => u.id === p.advisorId) : null;
   return `
     <div class="project-card card-interactive animate-fadeInUp">
@@ -344,16 +357,15 @@ function projectCardHTML(p) {
         ${p.skills.length > 5 ? `<span class="skill-tag">+${p.skills.length - 5}</span>` : ''}
       </div>
       <div class="card-footer" style="margin:-1.25rem;margin-top:0;border-radius:0 0 0.75rem 0.75rem">
-        ${advisor ? `<span class="text-xs text-muted">${escapeHtml(advisor.name)}</span>` : ''}
+        ${advisor ? `<span class="text-xs text-muted">Orientador: ${escapeHtml(advisor.name)}</span>` : ''}
         <button class="btn btn-outline btn-sm btn-view-project" data-id="${p.id}" style="margin-left:auto">Ver detalhes</button>
       </div>
     </div>
   `;
 }
 
-function matchCardHTML(p, matchCount, matchSkills) {
-  const users   = getAllUsers();
-  const owner   = users.find(u => u.id === p.ownerId);
+function matchCardHTML(p, matchCount, matchSkills, users) {
+  const owner = users.find(u => u.id === p.ownerId);
   return `
     <div class="project-card card-interactive animate-fadeInUp">
       <div>
@@ -372,9 +384,10 @@ function matchCardHTML(p, matchCount, matchSkills) {
         ).join('')}
       </div>
       <div class="card-footer" style="margin:-1.25rem;margin-top:0;border-radius:0 0 0.75rem 0.75rem">
-        ${owner ? `<span class="text-xs text-muted">${escapeHtml(owner.name)}</span>` : ''}
+        ${owner ? `<span class="text-xs text-muted">Responsável: ${escapeHtml(owner.name)}</span>` : ''}
         <button class="btn btn-accent btn-sm btn-view-project" data-id="${p.id}" style="margin-left:auto">Ver projeto</button>
       </div>
     </div>
   `;
 }
+
